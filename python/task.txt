@@ -1,0 +1,142 @@
+
+#creation of database
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+insert into students VALUES(001,'rahul','sharma','rahul@abc.com',9905476543,'1999-12-23','2020-06-04',001),
+(002,'raj','sharma','raj@abc.com',9900987653,'1999-05-06','2020-06-04',001),
+(003,'aditi','metha','aditi@abc.com',9905425637,'1999-08-20','2020-06-02',001),
+(004,'parul','jain','parul@abc.com',9905098765,'2000-04-23','2020-06-02',002),
+(005,'shayam','pandit','shayam@abc.com',8890476543,'2000-12-08','2020-06-03',002),
+(006,'ajay','garg','ajay@abc.com',7440076543,'1998-10-23','2020-06-01',004),
+(007,'kashish','jain','kashish@abc.com',9905409812,'1998-09-10','2020-06-03',003),
+(008,'tanu','agrawal','tanu@abc.com',9905479083,'2000-02-15','2020-06-06',004),
+(009,'disha','metha','disha@abc.com',9995486543,'1999-01-23','2020-06-04',002),
+(010,'anuj','pandit','anuj@abc.com',9452890143,'1999-10-13','2020-06-07',003);
+
+insert INTO courses values(111,'cs',001,101,4),
+(112,'zoology',002,102,5),
+(113,'botany',003,102,5),
+(114,'physics',004,101,4);
+
+
+insert into departments values(001,'school of computer science'),
+(002,'school of science'),
+(003,'school of science'),
+(004,'school of science');
+
+insert into professors values(101,'rajat','singh','rajat@xyz.com',5656789432),
+(102,'suraj','patel','suraj@xyz.com',7890632198);
+
+insert into enrollments values(1181,001,111,'2020-06-04',3),
+(1182,002,111,'2020-06-04',3),
+(1183,003,111,'2020-06-02',3),
+(1184,004,112,'2020-06-02',4),
+(1185,005,112,'2020-06-03',4),
+(1186,006,114,'2020-06-01',3),
+(1187,007,113,'2020-06-03',3),
+(1188,008,114,'2020-06-06',4),
+(1189,009,112,'2020-06-04',5),
+(1190,010,113,'2020-06-07',5)
+;
+
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+#formation of foreign key 
+
+ALTER TABLE Students
+ADD CONSTRAINT fk_department_id
+FOREIGN KEY (department_id) REFERENCES Departments(department_id);
+
+ALTER TABLE Courses
+ADD CONSTRAINT fk_courses_department
+FOREIGN KEY (department_id) REFERENCES Departments(department_id);
+
+ALTER TABLE Courses
+ADD CONSTRAINT fk_courses_professor
+FOREIGN KEY (professor_id) REFERENCES Professors(professor_id);
+
+ALTER TABLE Enrollments
+ADD CONSTRAINT fk_enrollments_student
+FOREIGN KEY (student_id) REFERENCES Students(student_id);
+
+ALTER TABLE Enrollments
+ADD CONSTRAINT fk_enrollments_course
+FOREIGN KEY (course_id) REFERENCES Courses(course_id);
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+1.Find the Total Number of Students in Each Department
+
+SELECT d.department_name, COUNT(s.student_id) AS total_students
+FROM Students s
+JOIN Departments d ON s.department_id = d.department_id
+WHERE s.department_id IS NOT NULL
+GROUP BY d.department_name;
+
+2. List All Courses Taught by a Specific Professor
+SELECT c.course_name
+FROM Courses c
+JOIN Professors p ON c.professor_id = p.professor_id
+WHERE p.professor_id = 1;
+
+3. Find the Average Grade of Students in Each Course
+SELECT c.course_name, AVG(e.grade) AS avg_credit_score
+FROM Enrollments e
+JOIN Courses c ON e.course_id = c.course_id
+GROUP BY c.course_name;
+
+
+4. List All Students Who Have Not Enrolled in Any Courses
+SELECT s.first_name, s.last_name
+FROM Students s
+LEFT JOIN Enrollments e ON s.student_id = e.student_id
+WHERE e.student_id IS NULL;
+
+5. Find the Number of Courses Offered by Each Department
+SELECT d.department_name, COUNT(c.course_id) AS total_courses
+FROM Courses c
+JOIN Departments d ON c.department_id = d.department_id
+GROUP BY d.department_name;
+
+
+6. List All Students Who Have Taken a Specific Course (e.g., 'Database Systems')
+SELECT s.first_name, s.last_name
+FROM Students s
+JOIN Enrollments e ON s.student_id = e.student_id
+JOIN Courses c ON e.course_id = c.course_id
+WHERE c.course_name = 'physics';
+
+
+7. Find the Most Popular Course Based on Enrollment Numbers
+SELECT c.course_name, COUNT(e.student_id) AS num_enrollments
+FROM Enrollments e
+JOIN Courses c ON e.course_id = c.course_id
+GROUP BY c.course_name
+ORDER BY num_enrollments DESC
+LIMIT 1;
+
+
+8. Find the Average Number of Credits Per Student in a Department
+select d.department_name, avg(c.credits) as avg_credit_per_stud
+from students s
+join departments d on s.department_id=d.departmnet_id
+join enrollments e on s.student_id=e.student_id
+join courses c on e.course_id = c.course_id
+where d.departmnet_id=1
+group by d.department_name;
+
+9. List All Professors Who Teach in More Than One Department
+select p.first_name,p.last_name
+from professors p
+join courses c on p.professor_id=c.professor_id
+group by p.professor_id
+having count(DISTINCT c.department_id)>1;
+
+10. Get the Highest and Lowest Grade in a Specific Course (e.g., 'Operating Systems')
+SELECT MAX(c.credits) AS highest_credits,
+       MIN(c.credits) AS lowest_credits
+FROM Enrollments e
+JOIN Courses c ON e.course_id = c.course_id
+WHERE c.course_name = 'zoology';
+
